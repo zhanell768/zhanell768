@@ -1,0 +1,41 @@
+#Проверка на чётность: Если длина массива numbers нечётная, метод выбрасывает исключение IllegalArgumentException с сообщением о том, что количество элементов должно быть чётным.
+Деление попарно: Мы перебираем массив с шагом 2 (то есть по парам: numbers[i] и numbers[i + 1]). Для каждого такого деления:
+Если делитель не равен нулю, выполняем обычное деление.
+Если делитель равен нулю, ловим исключение ArithmeticException и записываем 0 в массив результатов.
+Возврат результата: После завершения делений возвращаем массив с результатами.
+
+import java.util.Arrays;
+
+public class ExceptionTaskDivide {
+    private ExceptionTaskDivide() {}
+
+    public static int[] divide(int... numbers) {
+        // Проверка, что количество элементов четное
+        if (numbers.length % 2 != 0) {
+            throw new IllegalArgumentException("Количество элементов должно быть четным");
+        }
+
+        // Массив для хранения результатов делений
+        int[] result = new int[numbers.length / 2];
+
+        // Деление попарно
+        for (int i = 0; i < numbers.length; i += 2) {
+            try {
+                result[i / 2] = numbers[i] / numbers[i + 1];  // Попарное деление
+            } catch (ArithmeticException e) {
+                result[i / 2] = 0;  // Если деление на ноль, записываем 0
+            }
+        }
+
+        return result;  // Возвращаем массив с результатами
+    }
+
+    public static void main(String[] args) {
+        // Пример вызова метода
+        System.out.println("Делим попарно 4, 2, 4, 1: " + Arrays.toString(divide(4, 2, 4, 1)));
+        System.out.println("Делим попарно 0, 2, 0, 0: " + Arrays.toString(divide(0, 2, 0, 0)));
+    }
+}
+
+#Делим попарно 4, 2, 4, 1: [2, 4]
+Делим попарно 0, 2, 0, 0: [0, 0]
