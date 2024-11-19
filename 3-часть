@@ -1,0 +1,51 @@
+#Проверка на null для массива:
+
+1.В начале метода проверяется, является ли входной массив null. Если это так, метод сразу возвращает 0 и сообщает об этом.
+Обработка ошибок в цикле:
+2.В цикле, где происходит вычисление, добавлены блоки try-catch. В случае возникновения ArithmeticException (например, деление на 0), просто добавляется 0 к результату, и программа продолжает работу с последующим элементом массива.
+Добавлен также блок для ловли NullPointerException, на случай если элемент массива окажется равен null.
+3.Возврат результата:
+Метод возвращает итоговый результат после всех итераций
+
+public class ExceptionTaskBuggyMethod { 
+    private ExceptionTaskBuggyMethod() {}
+
+    public static int buggyMethod(Integer[] inputNumbers) { 
+        int result = 0;
+
+        // Проверка на null
+        if (inputNumbers == null) {
+            System.out.println("Входной массив равен null");
+            return result;  // Возвращаем 0, если входной массив null
+        }
+
+        // Обрабатываем каждое число в массиве
+        for (var item : inputNumbers) {
+            try {
+                // Выполняем вычисление
+                result += (item + 1) / item;
+            } catch (ArithmeticException e) {
+                // Если произошла ошибка деления на ноль, результат итерации равен 0
+                System.out.println("Ошибка в вычислениях для элемента: " + item);
+                result += 0;  // Пропускаем ошибочную итерацию, результат равен 0
+            } catch (NullPointerException e) {
+                // Если элемент массива равен null, тоже пропускаем
+                System.out.println("Ошибка: элемент массива равен null");
+                result += 0;  // Пропускаем ошибочную итерацию
+            }
+        }
+
+        return result;  // Возвращаем итоговый результат
+    }
+
+    public static void main(String[] args) { 
+        System.out.println("Результат с null: " + buggyMethod(null)); 
+        System.out.println("Результат с массивом [1, 0]: " + buggyMethod(new Integer[]{1, 0})); 
+    } 
+}
+
+
+Входной массив равен null
+Результат с null: 0
+Ошибка в вычислениях для элемента: 0
+Результат с массивом [1, 0]: 1
