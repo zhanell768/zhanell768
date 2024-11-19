@@ -1,0 +1,53 @@
+#Метод processString:
+Этот метод выбрасывает исключение, если строка содержит символы "Ю" или "Ё". В случае с "Ю" выбрасывается IllegalArgumentException, а для "Ё" — NullPointerException.
+Метод getAllElements:
+Для каждого элемента входного массива вызывается processString.
+В случае возникновения исключения в блоке catch мы добавляем сообщение об ошибке в список.
+В блоке finally всегда добавляется строка "end", чтобы гарантировать добавление этой строки независимо от того, была ли ошибка или нет.
+Главный метод main:
+В методе main вызывается getAllElements с примером массива строк, и выводится результат.
+
+import java.util.ArrayList;
+import java.util.Arrays;
+
+public class ExceptionTaskGetAllElements {
+
+    private static String processString(String item) {
+        if (item.contains("Ю")) {
+            throw new IllegalArgumentException("Обнаружена буква Ю!");
+        }
+        if (item.contains("Ё")) {
+            throw new NullPointerException("Ё не разрешено!");
+        }
+        return item;
+    }
+
+    public static String[] getAllElements(String[] input) {
+        var result = new ArrayList<String>(input.length);
+        
+        for (String item : input) {
+            try {
+                // Попытка обработать строку
+                result.add(processString(item));
+            } catch (Exception e) {
+                // В случае ошибки добавляем сообщение об исключении
+                result.add("Ошибка: " + e.getMessage());
+            } finally {
+                // В любом случае добавляем строку "end"
+                result.add("end");
+            }
+        }
+
+        // Преобразуем список в массив строк и возвращаем
+        return result.toArray(new String[0]);
+    }
+
+    public static void main(String[] args) {
+        // Пример вызова метода
+        System.out.println(Arrays.toString(getAllElements(new String[]{"Ю", "б", "в", "Ю", "Д", "ЁЖ"})));
+    }
+}
+
+#Вывод
+[Ошибка: Обнаружена буква Ю!, end, б, end, в, end, Ошибка: Обнаружена буква Ю!, end, Д, end, Ошибка: Ё не разрешено!, end]
+
