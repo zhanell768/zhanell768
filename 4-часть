@@ -1,0 +1,39 @@
+#1. Метод simpleAbs:
+Если left < right, то выбрасывается кастомное исключение CustomException, с сообщением 'my custom exception'.
+В случае, если left >= right, возвращается разница этих значений.
+Класс CustomException:
+2. Класс расширяет Exception и содержит конструктор, который принимает строку с сообщением и передает её родительскому классу через super(message).
+Главный метод main:
+3. В первой строке вызывается simpleAbs(3, 2), результат будет просто 3 - 2 = 1, исключения не будет.
+Во второй части вызывается simpleAbs(1, 2), где left < right, что приводит к выбросу исключения CustomException. Исключение перехватывается в блоке catch, где выводится сообщение об успешном перехвате.
+
+public class ExceptionTaskCustomException { 
+    public static int simpleAbs(int left, int right) throws CustomException { 
+        if (left < right) { 
+            throw new CustomException("my custom exception");  // Бросаем исключение с кастомным сообщением
+        } 
+        return left - right;  // Возвращаем разницу, если нет исключения
+    } 
+
+    public static void main(String[] args) throws Exception { 
+        System.out.println("No exception: " + simpleAbs(3, 2)); 
+        try { 
+            System.out.println("Exception: " + simpleAbs(1, 2));  // Тут выбрасывается исключение
+            System.out.println("Исключение не брошено, ошибка!"); 
+        } catch (CustomException e) { 
+            System.out.println("Успешно брошено исключение: " + e.getMessage());  // Обрабатываем кастомное исключение
+        } 
+    } 
+} 
+
+// Реализация кастомного исключения
+class CustomException extends Exception { 
+    // Конструктор, который передает сообщение в родительский класс Exception
+    public CustomException(String message) {
+        super(message);  // Передаем сообщение в родительский конструктор
+    }
+}
+
+#Вывод
+No exception: 1
+Успешно брошено исключение: my custom exception
