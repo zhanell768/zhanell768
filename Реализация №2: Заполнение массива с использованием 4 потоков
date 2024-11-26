@@ -1,0 +1,36 @@
+#Массив делится на 4 равные части.
+	•	Каждый поток заполняет свою часть массива.
+	•	Используем ExecutorService для управления потоками.
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+public class MultiThreadArray {
+    public static void main(String[] args) {
+        int size = 100_000_000;
+        double[] array = new double[size];
+        int threads = 4;
+        ExecutorService executor = Executors.newFixedThreadPool(threads);
+
+        long startTime = System.currentTimeMillis();
+
+        for (int t = 0; t < threads; t++) {
+            final int start = t * (size / threads);
+            final int end = (t + 1) * (size / threads);
+
+            executor.execute(() -> {
+                for (int i = start; i < end; i++) {
+                    array[i] = 1.14 * Math.cos(i) * Math.sin(i * 0.2) * Math.cos(i / 1.2);
+                }
+            });
+        }
+
+        executor.shutdown();
+        while (!executor.isTerminated()) {
+        }
+
+        long endTime = System.currentTimeMillis();
+        System.out.println("Multi-thread execution time: " + (endTime - startTime) + " ms");
+    }
+}
+
