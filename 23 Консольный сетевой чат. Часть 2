@@ -1,0 +1,122 @@
+import java.io.*;
+import java.net.*;
+import java.util.*;
+
+public class ChatServer {
+    private static final int PORT = 12345;
+    private static final Map<String, ClientHandler> clients = new HashMap<>();
+
+    public static void main(String[] args) {
+        System.out.println("Chat server started...");
+
+        try (ServerSocket serverSocket = new ServerSocket(PORT)) {
+            while (true) {
+                Socket clientSocket = serverSocket.accept();
+                ClientHandler clientHandler = new ClientHandler(clientSocket);
+                new Thread(clientHandler).start();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static synchronized void broadcast(String message, String sender) {
+        for (ClientHandler client : clients.values()) {
+            if (!client.getUsername().equals(sender)) {
+                client.sendMessage(message);
+            }
+        }
+    }
+
+    public static synchronized void addClient(String username, ClientHandler clientHandler) {
+        clients.put(username, clientHandler);
+    }
+
+    public static synchronized void removeClient(String username) {
+        clients.remove(username);
+    }
+
+    public static synchronized boolean kickUser(String username) {
+        ClientHandler client = clients.get(username);
+        if (client != null) {
+            client.sendMessage("You have been kicked out by an admin.");
+            client.closeConnection();
+            removeClient(username);
+            return true;
+        }
+        return false;
+    }
+}
+
+class ClientHandler implements Runnable {
+    private final Socket socket;
+    private String username;
+    private String role = "USER"; // Default role
+    private BufferedReader in;
+    private PrintWriter out;
+
+    public ClientHandler(Socket socket) {
+        this.socket = socket;
+    }
+
+    @Override
+    public void run() {
+        try {
+            in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            out = new PrintWriter(socket.getOutputStream(), true);
+
+            out.println("Enter your username:");
+            username = in.readLine();
+            
+            // Assign ADMIN role to the first user (for simplicity)
+            if (ChatServer.clients.isEmpty()) {
+                role = "ADMIN";
+                out.println("You are an ADMIN.");
+            }
+
+            synchronized (ChatServer.class) {
+                ChatServer.addClient(username, this);
+            }
+
+            ChatServer.broadcast(username + " has joined the chat.", username);
+
+            String message;
+            while ((message = in.readLine()) != null) {
+                if (message.startsWith("/kick ") && role.equals("ADMIN")) {
+                    String targetUsername = message.substring(6);
+                    if (ChatServer.kickUser(targetUsername)) {
+                        ChatServer.broadcast(targetUsername + " was kicked out by " + username, username);
+                    } else {
+                        out.println("User " + targetUsername + " not found.");
+                    }
+                } else {
+                    ChatServer.broadcast(username + ": " + message, username);
+                }
+            }
+        } catch (IOException e) {
+            System.out.println(username + " disconnected.");
+        } finally {
+            closeConnection();
+            synchronized (ChatServer.class) {
+                ChatServer.removeClient(username);
+            }
+            ChatServer.broadcast(username + " has left the chat.", username);
+        }
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void sendMessage(String message) {
+        out.println(message);
+    }
+
+    public void closeConnection() {
+        try {
+            if (socket != null) socket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
